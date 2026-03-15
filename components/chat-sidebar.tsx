@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -40,13 +39,8 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
 
   async function loadSessions() {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
-        return
-      }
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setLoading(false); return }
 
       const { data, error } = await supabase
         .from("chat_sessions")
@@ -67,14 +61,9 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
     e.stopPropagation()
     try {
       const { error } = await supabase.from("chat_sessions").delete().eq("id", sessionId)
-
       if (error) throw error
-
       setSessions((prev) => prev.filter((s) => s.id !== sessionId))
-
-      if (currentSessionId === sessionId) {
-        onNewChat()
-      }
+      if (currentSessionId === sessionId) onNewChat()
     } catch (error) {
       console.error("Error deleting session:", error)
     }
@@ -90,13 +79,11 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
 
   function groupSessionsByDate(sessions: ChatSession[]) {
     const groups: { [key: string]: ChatSession[] } = {}
-
     sessions.forEach((session) => {
       const key = formatSessionDate(session.updated_at)
       if (!groups[key]) groups[key] = []
       groups[key].push(session)
     })
-
     return groups
   }
 
@@ -104,12 +91,10 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
 
   if (isGuest) {
     return (
-      <div
-        className={cn(
-          "h-full border-r border-border/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all duration-300",
-          collapsed ? "w-16" : "w-72",
-        )}
-      >
+      <div className={cn(
+        "h-full border-r border-border/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all duration-300",
+        collapsed ? "w-16" : "w-72",
+      )}>
         <div className="p-4 border-b border-border/50 flex items-center justify-between">
           {!collapsed && <h2 className="font-semibold text-sm">Chat History</h2>}
           <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)}>
@@ -131,12 +116,10 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
   }
 
   return (
-    <div
-      className={cn(
-        "h-full border-r border-border/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all duration-300 flex flex-col",
-        collapsed ? "w-16" : "w-72",
-      )}
-    >
+    <div className={cn(
+      "h-full border-r border-border/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all duration-300 flex flex-col",
+      collapsed ? "w-16" : "w-72",
+    )}>
       <div className="p-4 border-b border-border/50 flex items-center justify-between">
         {!collapsed && <h2 className="font-semibold text-sm">Chat History</h2>}
         <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)}>
@@ -158,7 +141,7 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 px-2">
+  <ScrollArea className="flex-1 px-2">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -184,32 +167,47 @@ export function ChatSidebar({ currentSessionId, onNewChat, onSelectSession, isGu
                 {dateSessions.map((session) => (
                   <div
                     key={session.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onSelectSession(session.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSelectSession(session.id);
+                      }
+                    }}
                     className={cn(
-                      "group flex items-center gap-2 rounded-lg p-2 transition-colors",
+                      "w-full text-left rounded-lg p-2 transition-colors group cursor-pointer",
                       currentSessionId === session.id
                         ? "bg-indigo-100 dark:bg-indigo-900/30"
                         : "hover:bg-slate-100 dark:hover:bg-slate-800/50",
                     )}
                   >
-                    <button
-                      type="button"
-                      onClick={() => onSelectSession(session.id)}
-                      className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                    >
+                    <div className="flex items-center gap-2">
                       <MessageSquare size={16} className="flex-shrink-0 text-muted-foreground" />
-                      {!collapsed && <span className="text-sm truncate flex-1">{session.title}</span>}
-                    </button>
-                    {!collapsed && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => deleteSession(session.id, e)}
-                      >
-                        <Trash2 size={14} className="text-muted-foreground hover:text-destructive" />
-                      </Button>
-                    )}
+                      {!collapsed && (
+                        <>
+                          <span className="text-sm truncate flex-1">{session.title}</span>
+                          {/* Fixed: Replaced Button with accessible div */}
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={(e) => deleteSession(session.id, e)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteSession(session.id, e as any);
+                              }
+                            }}
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded hover:bg-red-100 dark:hover:bg-red-900/20 cursor-pointer"
+                            aria-label="Delete session"
+                          >
+                            <Trash2 size={14} className="text-muted-foreground hover:text-destructive" />
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
