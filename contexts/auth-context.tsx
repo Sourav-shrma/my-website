@@ -72,7 +72,7 @@ async function initializeAuth() {
           if (event === "SIGNED_IN" && currentSession) {
             const currentPath = window.location.pathname
             if (currentPath === "/auth/login" || currentPath === "/auth/signup") {
-              window.location.href = "/dashboard"
+              window.location.href = "/" // Redirect to home page
             }
           }
 

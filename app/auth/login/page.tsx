@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   useEffect(() => {
   if (!success) return
-  window.location.href = "/dashboard" // ← was "/", change to your real route
+  window.location.href = "/" // Return to home page
 }, [success])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -58,7 +58,7 @@ export default function LoginPage() {
               <CheckCircle className="h-12 w-12 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back!</h2>
-            <p className="text-gray-500 mb-6">Taking you to your dashboard...</p>
+            <p className="text-gray-500 mb-6">Taking you to your home page...</p>
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </CardContent>
         </Card>

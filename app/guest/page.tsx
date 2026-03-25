@@ -83,12 +83,12 @@ const emotionColors: Record<string, string> = {
 
 function detectEmotion(text: string): string {
   const lowerText = text.toLowerCase()
-  if (/(happy|joy|excited|great|wonderful|amazing|good|fantastic|blessed)/i.test(lowerText)) return "happy"
-  if (/(sad|depressed|down|unhappy|miserable|crying|tears|lonely)/i.test(lowerText)) return "sad"
-  if (/(anxious|worried|nervous|scared|fear|panic|stress|overwhelmed)/i.test(lowerText)) return "anxious"
-  if (/(angry|frustrated|annoyed|mad|furious|irritated)/i.test(lowerText)) return "angry"
-  if (/(hope|hopeful|optimistic|looking forward|better|improve)/i.test(lowerText)) return "hopeful"
-  if (/(stress|pressure|tension|burden|exhausted|tired)/i.test(lowerText)) return "stressed"
+  if (/\b(happy|joy|excited|great|wonderful|amazing|good|fantastic|blessed|awesome)\b/i.test(lowerText)) return "happy"
+  if (/\b(sad|depressed|down|unhappy|miserable|crying|tears|lonely|heartbroken|upset)\b/i.test(lowerText)) return "sad"
+  if (/\b(anxious|worried|nervous|scared|fear|panic|stress|overwhelmed|terrified)\b/i.test(lowerText)) return "anxious"
+  if (/\b(angry|frustrated|annoyed|mad|furious|irritated|pissed)\b/i.test(lowerText)) return "angry"
+  if (/\b(hope|hopeful|optimistic|looking forward|better|improve)\b/i.test(lowerText)) return "hopeful"
+  if (/\b(stress|pressure|tension|burden|exhausted|tired|drained)\b/i.test(lowerText)) return "stressed"
   return "neutral"
 }
 
@@ -155,7 +155,12 @@ export default function GuestChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content
+          }))
+        }),
       })
 
       if (!res.ok) {
